@@ -1,0 +1,5 @@
+# audit runs contain vendor confidential offers and derived data
+offer_audit_runs/
+__pycache__/
+*.pyc
+*.tmp

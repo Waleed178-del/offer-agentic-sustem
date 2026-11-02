@@ -1,0 +1,90 @@
+{
+  "_comment": "Deterministic trap lexicon used by prescan.py. Case insensitive regex. Extend per vendor language. Agent 5 reads every hit.",
+  "exclusion": [
+    "\\bnot\\s+(?:be\\s+)?included\\b",
+    "\\bexclud(?:ed|es|ing)\\b",
+    "\\bexclusions?\\b",
+    "does\\s+not\\s+include",
+    "\\bout\\s+of\\s+(?:our\\s+)?scope\\b",
+    "\\bnot\\s+(?:in|part\\s+of)\\s+(?:the\\s+|our\\s+)?(?:supply|scope)\\b",
+    "\\bescluso\\b", "\\bescluse\\b", "\\bnon\\s+incluso\\b",
+    "\\bnicht\\s+enthalten\\b", "\\bnon\\s+inclus\\b"
+  ],
+  "buyer_supply": [
+    "buyer'?s?\\s+(?:supply|scope|responsibility|care)",
+    "customer'?s?\\s+(?:supply|scope|responsibility|care)",
+    "client'?s?\\s+(?:supply|scope|responsibility|care)",
+    "customer\\s+will\\s+(?:supply|provide)",
+    "by\\s+(?:the\\s+)?(?:customer|buyer|client|purchaser|others)\\b",
+    "to\\s+be\\s+(?:supplied|provided)\\s+by\\s+(?:the\\s+)?(?:customer|buyer|client|purchaser)",
+    "a\\s+cura\\s+del\\s+cliente", "fornitura\\s+cliente", "bauseits"
+  ],
+  "optional": [
+    "\\boption(?:al|s)?\\b",
+    "\\bupon\\s+request\\b",
+    "\\bon\\s+request\\b",
+    "\\bnot\\s+quoted\\b",
+    "\\bextra\\s+(?:cost|price|charge)\\b",
+    "\\bat\\s+additional\\s+cost\\b",
+    "\\bopzionale\\b"
+  ],
+  "alternative": [
+    "\\balternative(?:ly)?\\b",
+    "\\bin\\s+place\\s+of\\b",
+    "\\binstead\\s+of\\b",
+    "\\bas\\s+an\\s+alternative\\b"
+  ],
+  "preliminary": [
+    "\\bpreliminary\\b",
+    "\\bindicative\\b",
+    "\\bbudgetary\\b",
+    "\\bto\\s+be\\s+(?:confirmed|defined|agreed|verified)\\b",
+    "\\bTB[CDA]\\b",
+    "\\bsubject\\s+to\\b",
+    "\\bapprox(?:imately|\\.)?\\b",
+    "\\bestimated\\b",
+    "\\bnot\\s+binding\\b",
+    "\\bfor\\s+reference\\s+only\\b",
+    "\\bda\\s+definire\\b", "\\bda\\s+confermare\\b"
+  ],
+  "guarantee": [
+    "\\bguarantee[ds]?\\b",
+    "\\bwarrant(?:y|ies|ed)\\b",
+    "\\bliquidated\\s+damages\\b",
+    "\\bpenalt(?:y|ies)\\b",
+    "\\bperformance\\s+test\\b",
+    "\\bacceptance\\s+test\\b"
+  ],
+  "commercial": [
+    "\\btotal\\s+price\\b",
+    "\\bprice\\b",
+    "\\bEUR\\b", "\\bUSD\\b", "\\u20ac",
+    "\\bincoterms?\\b", "\\bEXW\\b", "\\bFCA\\b", "\\bFOB\\b", "\\bCIF\\b", "\\bDAP\\b", "\\bDDP\\b",
+    "\\bpayment\\s+terms?\\b",
+    "\\bdelivery\\s+time\\b",
+    "\\bvalidity\\b"
+  ],
+  "services": [
+    "\\berection\\b",
+    "\\bcommissioning\\b",
+    "\\bsupervision\\b",
+    "\\bfoundations?\\b",
+    "\\bcivil\\s+works?\\b",
+    "\\bhydraulic\\s+oil\\b",
+    "\\bfirst\\s+filling\\b",
+    "\\bcabling\\b", "\\bcables?\\b", "\\braceways?\\b",
+    "\\bfenc(?:e|es|ing)\\b",
+    "\\bscrap\\s+box(?:es)?\\b",
+    "\\btraining\\b",
+    "\\bspare\\s+parts?\\b",
+    "\\btransport\\b", "\\bpacking\\b", "\\binsurance\\b"
+  ],
+  "corruption_tokens": [
+    "#VALORE!", "#VALUE!", "#REF!", "#RIF!", "#DIV/0!", "#N/A", "#NOME?", "#NAME?", "#NUM!", "#NULL!",
+    "Error! Reference source not found",
+    "Errore. L'origine riferimento non",
+    "Error! Bookmark not defined",
+    "Errore. Il segnalibro non"
+  ],
+  "units_for_blank_detection": ["Nm3/h", "Nm³/h", "m3/h", "m³/h", "l/min", "kW", "kVA", "bar", "°C", "kg/h", "Nm3/T", "Nm³/t", "kWh/t", "m3/T"]
+}

@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "offer-audit/alignment.schema.json",
+  "title": "Agent 6 cross-offer alignment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["agent_id", "offers", "key_aliases", "headline_prices", "mandatory_options", "branches", "baselines"],
+  "properties": {
+    "agent_id": {"const": "AGENT_6_NORMALIZER"},
+    "offers": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "key_aliases": {
+      "type": "array",
+      "description": "Maps an offer specific key (often x.*) onto a canonical key.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offer_id", "from_key", "to_key", "rationale"],
+        "properties": {
+          "offer_id": {"type": "string"},
+          "from_key": {"type": "string"},
+          "to_key": {"type": "string"},
+          "from_attribute": {"type": "string"},
+          "to_attribute": {"type": "string"},
+          "rationale": {"type": "string"}
+        }
+      }
+    },
+    "headline_prices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offer_id", "amount", "currency", "finding_id"],
+        "properties": {
+          "offer_id": {"type": "string"},
+          "amount": {"type": ["number", "null"]},
+          "currency": {"type": "string"},
+          "finding_id": {"type": ["string", "null"]},
+          "incoterm": {"type": "string"},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "fx_rates_to_report_currency": {
+      "type": "object",
+      "additionalProperties": {"type": "number"}
+    },
+    "report_currency": {"type": "string"},
+    "mandatory_options": {
+      "type": "array",
+      "description": "Options the buyer must purchase to meet requirements. These are added to landed cost.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offer_id", "finding_id", "reason"],
+        "properties": {
+          "offer_id": {"type": "string"},
+          "finding_id": {"type": "string"},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "cost_adders": {
+      "type": "array",
+      "description": "Excluded or buyer-supply scope linked to cost book keys.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offer_id", "finding_id", "cost_adder_key"],
+        "properties": {
+          "offer_id": {"type": "string"},
+          "finding_id": {"type": "string"},
+          "cost_adder_key": {"type": "string"},
+          "quantity": {"type": "number"},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "branches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offer_id", "group", "base_finding_ids", "alternative_finding_ids"],
+        "properties": {
+          "offer_id": {"type": "string"},
+          "group": {"type": "string"},
+          "base_finding_ids": {"type": "array", "items": {"type": "string"}},
+          "alternative_finding_ids": {"type": "array", "items": {"type": "string"}},
+          "tradeoffs": {"type": "array", "items": {"type": "string"}},
+          "recommended": {"enum": ["BASE", "ALTERNATIVE", "UNDECIDED"]}
+        }
+      }
+    },
+    "baselines": {
+      "type": "array",
+      "description": "Reference production rate behind each offer's consumption figures.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["offer_id", "item_key", "reference_rate_kg_h"],
+        "properties": {
+          "offer_id": {"type": "string"},
+          "item_key": {"type": "string"},
+          "reference_rate_kg_h": {"type": ["number", "null"]},
+          "max_rate_kg_h": {"type": ["number", "null"]},
+          "finding_id": {"type": "string"}
+        }
+      }
+    },
+    "notes": {"type": "array", "items": {"type": "string"}}
+  }
+}

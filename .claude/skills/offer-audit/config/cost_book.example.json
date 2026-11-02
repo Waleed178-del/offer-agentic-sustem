@@ -1,0 +1,62 @@
+{
+  "_comment": "Buyer-owned price book for excluded and buyer-supply scope. Every figure must come from a real quote, a past project or a contractor estimate. Fill 'source'. The system never invents prices: keys missing here are reported as UNPRICED. Values below are PLACEHOLDERS set to null on purpose.",
+  "currency": "EUR",
+  "fx_to_report_currency": {"EUR": 1.0, "USD": null},
+  "items": {
+    "field_cabling": {
+      "description": "Field power and signal cabling plus raceways, panel to equipment and control desk",
+      "basis": "lump_sum",
+      "low": null,
+      "high": null,
+      "source": ""
+    },
+    "safety_fencing": {
+      "description": "Perimeter safety fences and doors",
+      "basis": "per_unit",
+      "unit": "m",
+      "low_per_unit": null,
+      "high_per_unit": null,
+      "default_quantity": null,
+      "source": ""
+    },
+    "safety_devices": {
+      "description": "Light barriers, laser scanners, safety locks (SICK / EUCHNER class)",
+      "basis": "lump_sum",
+      "low": null,
+      "high": null,
+      "source": ""
+    },
+    "foundations_civil": {
+      "description": "Foundations, pits, civil works",
+      "basis": "lump_sum",
+      "low": null,
+      "high": null,
+      "source": ""
+    },
+    "erection_labour": {
+      "description": "Mechanical and electrical erection labour",
+      "basis": "lump_sum",
+      "low": null,
+      "high": null,
+      "source": ""
+    },
+    "hydraulic_oil_first_fill": {
+      "description": "Hydraulic oil first filling",
+      "basis": "per_unit",
+      "unit": "l",
+      "low_per_unit": null,
+      "high_per_unit": null,
+      "default_quantity": null,
+      "source": ""
+    },
+    "scrap_boxes": {
+      "description": "Scrap and butt collection boxes",
+      "basis": "per_unit",
+      "unit": "pcs",
+      "low_per_unit": null,
+      "high_per_unit": null,
+      "default_quantity": null,
+      "source": ""
+    }
+  }
+}

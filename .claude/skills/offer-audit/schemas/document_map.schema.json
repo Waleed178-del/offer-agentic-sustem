@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "offer-audit/document_map.schema.json",
+  "title": "Agent 1 Document Map",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["offer_id", "agent_id", "page_count", "ocr_required", "sections", "drawings", "data_corruption", "boilerplate_pages"],
+  "properties": {
+    "offer_id": {"type": "string"},
+    "vendor": {"type": "string"},
+    "agent_id": {"const": "AGENT_1_INGESTION"},
+    "document_title": {"type": "string"},
+    "document_ref": {"type": "string", "description": "Vendor offer reference number and revision."},
+    "offer_date": {"type": "string"},
+    "page_count": {"type": "integer", "minimum": 1},
+    "ocr_required": {"type": "boolean"},
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section_id", "title", "page_start", "page_end", "domain"],
+        "properties": {
+          "section_id": {"type": "string", "pattern": "^(\\d+(\\.\\d+)*|[A-Z]+[0-9.]*|FRONT|ANNEX[0-9A-Z.]*)$"},
+          "title": {"type": "string"},
+          "page_start": {"type": "integer", "minimum": 1},
+          "page_end": {"type": "integer", "minimum": 1},
+          "parent_id": {"type": ["string", "null"]},
+          "domain": {
+            "enum": ["GENERAL", "COMMERCIAL", "UTILITIES", "FEEDING", "FURNACE", "PRESS", "HYDRAULICS", "TOOLING", "QUENCH", "HANDLING", "STRETCHER", "SAW", "AGEING", "DIE_OVEN", "CONVEYOR", "ELECTRICAL", "AUTOMATION", "SAFETY", "SCOPE_SPLIT", "OPTIONS", "SERVICES", "OTHER"]
+          },
+          "base_or_option": {"enum": ["BASE", "OPTION", "ALTERNATIVE", "MIXED", "UNKNOWN"]},
+          "has_tables": {"type": "boolean"},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "drawings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["page", "kind", "transcription_file"],
+        "properties": {
+          "page": {"type": "integer", "minimum": 1},
+          "kind": {"enum": ["CAD_LAYOUT", "PID_SCHEMATIC", "ELECTRICAL_SCHEMATIC", "PHOTO", "CHART", "TABLE_IMAGE", "OTHER"]},
+          "transcription_file": {"type": "string"},
+          "binding_constraints": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "data_corruption": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["corruption_id", "page", "token", "context"],
+        "properties": {
+          "corruption_id": {"type": "string", "pattern": "^C-[0-9]{3}$"},
+          "page": {"type": "integer", "minimum": 1},
+          "token": {"type": "string"},
+          "context": {"type": "string"},
+          "owning_domain": {"type": "string"}
+        }
+      }
+    },
+    "blank_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["page", "field"],
+        "properties": {
+          "page": {"type": "integer", "minimum": 1},
+          "field": {"type": "string"},
+          "owning_domain": {"type": "string"}
+        }
+      }
+    },
+    "boilerplate_pages": {"type": "array", "items": {"type": "integer", "minimum": 1}},
+    "notes": {"type": "string"}
+  }
+}

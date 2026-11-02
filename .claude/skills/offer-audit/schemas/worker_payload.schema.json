@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "offer-audit/worker_payload.schema.json",
+  "title": "Worker to Admin payload (Agents 2 to 5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["offer_id", "agent_id", "subsystem", "sections_covered", "pages_read", "extracted_findings", "self_check"],
+  "properties": {
+    "offer_id": {"type": "string", "minLength": 1},
+    "vendor": {"type": "string"},
+    "agent_id": {
+      "type": "string",
+      "enum": ["AGENT_2_PRESS_HYDRAULICS", "AGENT_3_THERMAL_UTILITIES", "AGENT_4_DOWNSTREAM_HANDLING", "AGENT_5_RISK_AND_SCOPE"]
+    },
+    "subsystem": {"type": "string", "minLength": 1},
+    "loop_iteration": {"type": "integer", "minimum": 0, "maximum": 2},
+    "sections_covered": {"type": "array", "items": {"type": "string"}},
+    "pages_read": {"type": "array", "items": {"type": "integer", "minimum": 1}},
+    "extracted_findings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    },
+    "acknowledged_corruptions": {
+      "type": "array",
+      "description": "Document Map corruption ids this worker has inspected and resolved or escalated.",
+      "items": {"type": "string"}
+    },
+    "open_questions": {"type": "array", "items": {"type": "string"}},
+    "self_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["all_quotes_verbatim", "all_assigned_sections_read", "no_values_inferred_without_derivation"],
+      "properties": {
+        "all_quotes_verbatim": {"type": "boolean"},
+        "all_assigned_sections_read": {"type": "boolean"},
+        "no_values_inferred_without_derivation": {"type": "boolean"},
+        "notes": {"type": "string"}
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quote", "page"],
+      "properties": {
+        "quote": {"type": "string", "minLength": 3},
+        "page": {"type": "integer", "minimum": 1},
+        "evidence_type": {"enum": ["TEXT", "TABLE", "DRAWING", "SCHEMATIC"]}
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finding_id", "category", "item", "item_key", "status", "evidence_quote", "source_page", "evidence_type", "confidence", "financial_impact", "action_required"],
+      "properties": {
+        "finding_id": {"type": "string", "pattern": "^A[2-5]-[0-9]{3,4}$"},
+        "category": {
+          "enum": [
+            "TECHNICAL_SPEC",
+            "PERFORMANCE_GUARANTEE",
+            "UTILITY_CONSUMPTION",
+            "HIDDEN_CAPEX_EXCLUSION",
+            "BUYER_SUPPLY",
+            "OPTIONAL_ITEM",
+            "SCOPE_PROMISE",
+            "CONFIGURATION_ALTERNATIVE",
+            "TECHNICAL_CONTRADICTION",
+            "INCOMPLETE_SPECIFICATION",
+            "DATA_CORRUPTION",
+            "COMMERCIAL_TERM"
+          ]
+        },
+        "item": {"type": "string", "minLength": 2},
+        "item_key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$",
+          "description": "Canonical dotted key from references/domain_taxonomy.md, or x.<vendor_term> when no canonical key fits."
+        },
+        "attribute": {"type": "string"},
+        "value": {"type": ["number", "string", "boolean", "null"]},
+        "unit": {"type": ["string", "null"]},
+        "status": {
+          "enum": [
+            "STATED",
+            "INCLUDED_BASE",
+            "OPTIONAL",
+            "ALTERNATIVE",
+            "EXCLUDED_FROM_SUPPLY",
+            "BUYER_SUPPLY",
+            "PRELIMINARY",
+            "CONFLICTING_SPECS",
+            "MISSING_DATA",
+            "CORRUPTED_VALUE",
+            "DERIVED_ESTIMATE",
+            "NOT_DERIVABLE"
+          ]
+        },
+        "evidence_quote": {"type": "string", "minLength": 3},
+        "source_page": {"type": "integer", "minimum": 1},
+        "supporting_evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+        "evidence_type": {"enum": ["TEXT", "TABLE", "DRAWING", "SCHEMATIC", "DERIVED"]},
+        "derivation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "input_finding_ids"],
+          "properties": {
+            "method": {"type": "string"},
+            "input_finding_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            "tool_output": {"type": "string", "description": "Exact stdout of the normalize_units.py call that produced value."}
+          }
+        },
+        "section_ref": {"type": "string"},
+        "option_price": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["amount", "currency"],
+          "properties": {
+            "amount": {"type": "number"},
+            "currency": {"type": "string", "minLength": 3, "maxLength": 3}
+          }
+        },
+        "alternative_group": {"type": "string", "description": "Shared id linking a base item and its alternatives, e.g. handling.puller_saw_branch"},
+        "cost_adder_key": {"type": "string", "description": "Key into the cost book for excluded or buyer-supply scope."},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "financial_impact": {"enum": ["HIGH", "MEDIUM", "LOW", "NONE", "UNKNOWN"]},
+        "action_required": {"type": "string"}
+      }
+    }
+  }
+}
