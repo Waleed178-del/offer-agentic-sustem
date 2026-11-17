@@ -10,7 +10,7 @@ Open this repository in Claude Code and ask:
 /offer-audit Audit and compare offers/omav_sms.pdf (OMAV/SMS) and offers/danieli.pdf (Danieli Breda). Cost book: inputs/cost_book.json. Requirement: must accept existing 7" tooling from an 1800 MT press.
 ```
 
-The main session becomes the Admin orchestrator. It dispatches six subagents (`.claude/agents/offer-*.md`), gates their output with deterministic scripts, loops failed work back at most twice, and writes `offer_audit_runs/<run>/report/Executive_Procurement_Report.md` plus one vendor-ready RFQ clarification file per offer.
+The main session becomes the Admin orchestrator. It dispatches six subagents (`.claude/agents/offer-*.md`), gates their output with deterministic scripts, loops failed work back at most twice, writes the Executive Procurement Report plus one vendor-ready RFQ clarification file per offer, then audits all 7 agents and packages the run into two zip files in `offer_audit_runs/<run>/package/`.
 
 ## Architecture
 
@@ -87,7 +87,17 @@ flowchart TD
         ADJ --> RR["render_report.py"]
     end
 
-    RR --> OUT([Executive_Procurement_Report.md<br/>RFQ_Clarifications_OFFER.md])
+    RR --> P5
+
+    subgraph P5["Phase 5: Audit and Package"]
+        direction TB
+        AUD{"package_results.py<br/>read-only audit of all 7 agents<br/>schema, evidence, fingerprint chain"}
+        AUD -- "any check fails" --> STOP["audit_failed.json<br/>no zips written"]
+        AUD -- "all pass" --> ZIPS["write and re-verify both zips"]
+    end
+
+    ZIPS --> OUT1([ZIP 1: project_7_agent_outputs.zip<br/>Admin + Agents 1 to 6])
+    ZIPS --> OUT2([ZIP 2: project_supporting_results.zip<br/>all other run files])
 ```
 
 ### Loop example: blank utility table (rule R4)
@@ -135,6 +145,18 @@ Deterministic layer (`.claude/skills/offer-audit/scripts/`, Python standard libr
 | `normalize_offer.py` | 4 | Verified findings to SI records |
 | `build_matrix.py` | 4 | Parity table, landed cost, branches, dossier. All arithmetic lives here |
 | `render_report.py` | 4 | Executive report and RFQ dossiers |
+| `package_results.py` | 5 | Audits all 7 agents, then writes and verifies the two zips |
+
+## Output package
+
+Nothing is zipped until all 7 agents pass the final audit.
+
+| Zip | Contents |
+|---|---|
+| `<project>_7_agent_outputs.zip` | `Admin/` report, RFQ dossiers, adjudication, gate verdicts, risk registers, state. `Agent_1_Ingestion/` document maps and vision transcriptions. `Agent_2` to `Agent_5` payloads. `Agent_6_Normalizer/` alignment, matrix, CSV exports. Plus `README.txt` and `AUDIT_MANIFEST.json`. |
+| `<project>_supporting_results.zip` | Every other file of the run: page corpus, renders, prescan, dispatch slices, validation, loop orders, normalized data, copied inputs. |
+
+`AUDIT_MANIFEST.json` (inside both zips) lists every audit check per agent and the sha256 of every packaged file.
 
 ## Requirements
 

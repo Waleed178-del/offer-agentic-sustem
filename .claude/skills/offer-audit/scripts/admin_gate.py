@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import AGENT_NUM_BY_ID, dump_json, iter_payloads, load_json, offer_dir, to_number  # noqa: E402
+from _common import dump_json, fingerprint, iter_payloads, load_json, offer_dir, to_number  # noqa: E402
 from normalize_units import UnitError, to_si  # noqa: E402
 
 KEY_OWNER = [
@@ -346,6 +346,10 @@ def main() -> None:
         "clarifications": clar,
         "verified_finding_count": len(good),
         "quarantined_finding_count": len(r2),
+        "quarantined_finding_ids": sorted(r2),
+        "inputs_sha256": fingerprint(run_dir, [odir / "document_map.json", validation_path]
+                                     + [p for _, p in iter_payloads(odir)]
+                                     + list((odir / "dispatch").glob("agent_*.json"))),
     }
     dump_json(odir / "gate" / "gate_report.json", report)
     dump_json(odir / "gate" / "risk_register.json", {"offer_id": a.offer, "entries": risk})

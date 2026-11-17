@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import dump_json, iter_payloads, load_json, offer_dir, to_number  # noqa: E402
+from _common import dump_json, fingerprint, iter_payloads, load_json, offer_dir, to_number  # noqa: E402
 from normalize_units import UnitError, to_si  # noqa: E402
 
 SCOPE_CLASS = {
@@ -101,6 +101,8 @@ def main() -> None:
         "record_count": len(records),
         "conversion_errors": errors,
         "records": records,
+        "inputs_sha256": fingerprint(run_dir, [odir / "gate" / "validation.json", odir / "gate" / "gate_report.json"]
+                                     + [p for _, p in iter_payloads(odir)]),
     }
     dump_json(odir / "normalized" / "offer_normalized.json", out)
     print(f"{a.offer}: {len(records)} normalized records, {len(errors)} unit errors")

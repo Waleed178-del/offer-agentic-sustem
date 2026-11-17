@@ -31,6 +31,7 @@ PHASES = [
     "validation_complete",
     "normalization_complete",
     "complete",
+    "packaged",
 ]
 MAX_LOOPS = 2
 
@@ -40,7 +41,8 @@ NEXT_ACTION = {
     "extraction_complete": "Phase 3: run validate_payload.py and admin_gate.py per offer, loop workers named in loop_orders.",
     "validation_complete": "Phase 4: run normalize_offer.py per offer, dispatch Agent 6, then build_matrix.py.",
     "normalization_complete": "Phase 4 close: write admin_adjudication.md, run render_report.py.",
-    "complete": "Done. Report is in RUN_DIR/report/.",
+    "complete": "Phase 5: run package_results.py. It audits all 7 agents and only then writes the two zips to RUN_DIR/package/.",
+    "packaged": "Done. Deliverables in RUN_DIR/package/: <project>_7_agent_outputs.zip and <project>_supporting_results.zip.",
 }
 
 
@@ -157,6 +159,8 @@ def cmd_advance(a: argparse.Namespace) -> None:
     target = PHASES.index(a.phase)
     if target != cur + 1:
         die(f"cannot move from {st['phase']} to {a.phase}; next allowed is {PHASES[min(cur + 1, len(PHASES) - 1)]}")
+    if a.phase == "packaged":
+        die("only package_results.py may set phase packaged, after a passing audit")
     if a.phase == "validation_complete":
         bad = [oid for oid, o in st["offers"].items() if o.get("gate_verdict") not in ("PASS", "PASS_WITH_CLARIFICATIONS")]
         if bad:

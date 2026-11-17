@@ -57,6 +57,28 @@ DOMAIN_OWNER = {
 }
 
 
+def sha256_file(path: Path) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def fingerprint(run_dir: Path, paths: Iterable[Path]) -> dict[str, str]:
+    """Map run-relative path -> sha256 for every existing file in paths.
+
+    Each pipeline step records the fingerprints of the inputs it consumed so
+    package_results.py can prove nothing changed after it was audited."""
+    out: dict[str, str] = {}
+    for p in sorted(set(Path(x) for x in paths)):
+        if p.is_file():
+            out[p.resolve().relative_to(run_dir.resolve()).as_posix()] = sha256_file(p)
+    return out
+
+
 def die(msg: str, code: int = 2) -> None:
     print(f"ERROR: {msg}", file=sys.stderr)
     sys.exit(code)

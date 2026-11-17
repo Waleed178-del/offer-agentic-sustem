@@ -28,7 +28,13 @@ offer_audit_runs/<run_id>/
   comparison/admin_adjudication.md   Admin
   report/Executive_Procurement_Report.md
   report/RFQ_Clarifications_<OFFER>.md
+  report/report_manifest.json        render_report.py fingerprints
+  package/<project>_7_agent_outputs.zip      package_results.py (after audit)
+  package/<project>_supporting_results.zip   package_results.py (after audit)
+  package/AUDIT_MANIFEST.json                or audit_failed.json
 ```
+
+Every producing step records `inputs_sha256` (run-relative path to sha256) of what it consumed: `gate_report.json`, `offer_normalized.json`, `matrix.json`, `report_manifest.json`. `package_results.py` recomputes them, so a file edited after it was audited blocks packaging.
 
 ## Worker finding (example)
 

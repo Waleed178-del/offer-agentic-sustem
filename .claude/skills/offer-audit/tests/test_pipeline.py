@@ -304,6 +304,53 @@ class PipelineTest(unittest.TestCase):
             self.assertIn(marker, rep)
         self.assertTrue((self.run_dir / "report" / "RFQ_Clarifications_OFFER_A.md").exists())
         run("state.py", "advance", "--run-dir", rd, "--phase", "complete")
+        self._package(rd, pa)
+
+    def _package(self, rd: str, pa: Path):
+        import zipfile
+
+        pkg = self.run_dir / "package"
+        # tampering after the gate must block packaging and write no zips
+        p4 = pa / "agent_4.json"
+        original = p4.read_text()
+        p4.write_text(original.replace('"subsystem": "test"', '"subsystem": "tampered"'))
+        r = run("package_results.py", "--run-dir", rd, ok=False)
+        self.assertEqual(r.returncode, 1, r.stdout)
+        self.assertIn("AUDIT FAILED", r.stdout)
+        self.assertIn("changed after it was audited", r.stdout)
+        self.assertEqual(list(pkg.glob("*.zip")), [])
+        self.assertTrue((pkg / "audit_failed.json").exists())
+        p4.write_text(original)
+
+        # phase packaged cannot be set by hand
+        self.assertNotEqual(run("state.py", "advance", "--run-dir", rd, "--phase", "packaged", ok=False).returncode, 0)
+
+        out = run("package_results.py", "--run-dir", rd).stdout
+        self.assertIn("AUDIT PASSED", out)
+        self.assertFalse((pkg / "audit_failed.json").exists())
+        z1 = pkg / "Test_Line_7_agent_outputs.zip"
+        z2 = pkg / "Test_Line_supporting_results.zip"
+        with zipfile.ZipFile(z1) as z:
+            n1 = z.namelist()
+            manifest = json.loads(z.read("AUDIT_MANIFEST.json"))
+        with zipfile.ZipFile(z2) as z:
+            n2 = z.namelist()
+        folders = {n.split("/")[0] for n in n1 if "/" in n}
+        self.assertEqual(folders, {"Admin", "Agent_1_Ingestion", "Agent_2_Press_Hydraulics", "Agent_3_Thermal_Utilities",
+                                   "Agent_4_Downstream_Handling", "Agent_5_Risk_RedTeam", "Agent_6_Normalizer"})
+        for must in ("Admin/report/Executive_Procurement_Report.md", "Admin/admin_adjudication.md", "Agent_1_Ingestion/OFFER_A/document_map.json",
+                     "Agent_5_Risk_RedTeam/OFFER_A/agent_5.json", "Agent_6_Normalizer/matrix.json", "README.txt"):
+            self.assertIn(must, n1)
+        self.assertEqual(manifest["audit_status"], "PASS")
+        self.assertTrue(all(s["status"] == "PASS" for s in manifest["audit"].values()))
+        # zip 2 holds every other run file, with no overlap
+        self.assertIn("OFFER_A/prescan.json", n2)
+        self.assertIn("OFFER_A/corpus/pages/001.txt", n2)
+        self.assertNotIn("OFFER_A/payloads/agent_5.json", n2)
+        packaged = len(manifest["zips"][z1.name]["files"]) + len(manifest["zips"][z2.name]["files"])
+        on_disk = [f for f in self.run_dir.rglob("*") if f.is_file() and pkg not in f.parents]
+        self.assertEqual(packaged, len(on_disk))
+        self.assertEqual(json.loads((self.run_dir / "state.json").read_text())["phase"], "packaged")
 
     def test_phase_skip_refused(self):
         rd = self.tmp / "skip"

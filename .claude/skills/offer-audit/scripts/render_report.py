@@ -13,7 +13,7 @@ from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import die, load_json  # noqa: E402
+from _common import die, dump_json, fingerprint, load_json  # noqa: E402
 
 
 def fmt(v, unit: str | None = None) -> str:
@@ -171,6 +171,12 @@ def main() -> None:
                 lines.append(f"> Page {e['page']}: \"{e['quote']}\"")
             lines.append("")
         (rep / f"RFQ_Clarifications_{oid}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    dump_json(rep / "report_manifest.json", {
+        "inputs_sha256": fingerprint(run_dir, [mpath, adj]),
+        "adjudication_present": adj.exists(),
+        "outputs_sha256": fingerprint(run_dir, [rep / "Executive_Procurement_Report.md"]
+                                      + [rep / f"RFQ_Clarifications_{o}.md" for o in offers]),
+    })
     print(f"wrote {rep / 'Executive_Procurement_Report.md'} and {len(offers)} RFQ dossiers")
 
 

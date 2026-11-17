@@ -115,11 +115,34 @@ python3 SKILL_DIR/scripts/render_report.py --run-dir RUN_DIR
 ```
 
 4. `state.py advance --run-dir RUN_DIR --phase normalization_complete`. Read `RUN_DIR/comparison/matrix.json` and the risk registers yourself. Write the adjudication section into `RUN_DIR/comparison/admin_adjudication.md` using the template in `SKILL_DIR/references/report_template.md`. Then rerun `render_report.py` so it is embedded.
-5. `state.py advance --phase complete`.
+5. `state.py advance --run-dir RUN_DIR --phase complete`.
+
+## Phase 5: Audit and Package (mandatory, last step)
+
+```bash
+python3 SKILL_DIR/scripts/package_results.py --run-dir RUN_DIR
+```
+
+The script audits all 7 agents first, read only, and writes nothing unless every check passes:
+
+* **Global**: phase is complete. Source PDFs still match the hash recorded at init (a missing PDF is a warning, a changed one is a failure).
+* **Agent 1**: document map valid, drawing transcriptions present, file identical to the version the gate audited.
+* **Agents 2 to 5**: payload valid, ids correct, self-check honest, every quote re-verified against the page text. Only findings the gate already quarantined may fail. File identical to the gated version.
+* **Agent 6**: alignment valid and covering every offer. Matrix built from the current alignment, normalized data and gate reports.
+* **Admin**: every gate verdict passing, adjudication written, report rendered from the current matrix and adjudication and not edited since.
+
+Each step records the sha256 of the inputs it consumed, so any edit after a check breaks the chain and blocks packaging. On failure the script exits 1, writes `package/audit_failed.json` and names each failed check. Fix the cause, rerun the step that produces the file (and every step after it), then package again. Never edit a file by hand to make the audit pass.
+
+On success it writes to `RUN_DIR/package/`:
+
+* `<project>_7_agent_outputs.zip`: one folder per agent (`Admin/`, `Agent_1_Ingestion/` to `Agent_6_Normalizer/`), plus `README.txt` and `AUDIT_MANIFEST.json`.
+* `<project>_supporting_results.zip`: every other file of the run at its run-relative path (corpus, prescan, dispatch, validation, normalized data, inputs, loop orders).
+
+Both zips are reopened and checked against the manifest hashes before the phase moves to `packaged`. Use `--audit-only` to see the audit without writing zips.
 
 ## Final Output (four views plus adjudication)
 
-`RUN_DIR/report/Executive_Procurement_Report.md` and CSV exports:
+Delivered inside `<project>_7_agent_outputs.zip` under `Admin/report/`. The report has:
 
 1. **System-by-System Technical Parity Table**: canonical keys, SI units, one column per offer, cells marked `MISSING`, `CONFLICT`, `OPTIONAL`, `DERIVED`.
 2. **True Landed Cost Normalization**: headline price, plus mandatory options, plus priced exclusions, with an explicit count and list of `UNPRICED` adders.
@@ -127,7 +150,7 @@ python3 SKILL_DIR/scripts/render_report.py --run-dir RUN_DIR
 4. **RFQ Clarification and Red-Flag Dossier**: prioritized, page-cited, ready to send to each vendor.
 5. **Admin Adjudication**: your recommendation with calibrated confidence and the hard truths.
 
-Reply to the user with: the verdict per offer, the top five red flags, landed cost delta with the unpriced count, the report path, and what remains unknown.
+Reply to the user with: the two zip paths, the audit result per agent, the verdict per offer, the top five red flags, landed cost delta with the unpriced count, the report path, and what remains unknown.
 
 ## Failure Modes You Must Handle
 

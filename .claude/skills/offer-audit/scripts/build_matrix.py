@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import die, dump_json, load_json, load_schema, validate_schema  # noqa: E402
+from _common import die, dump_json, fingerprint, load_json, load_schema, validate_schema  # noqa: E402
 
 TECH_CATEGORIES = {"TECHNICAL_SPEC", "PERFORMANCE_GUARANTEE", "UTILITY_CONSUMPTION", "CONFIGURATION_ALTERNATIVE", "INCOMPLETE_SPECIFICATION", "DATA_CORRUPTION", "TECHNICAL_CONTRADICTION"}
 PREFERENCE = ["BASE", "BASE_PRELIMINARY", "DERIVED", "OPTION", "ALTERNATIVE", "CONFLICT", "MISSING", "CORRUPTED", "UNKNOWN"]
@@ -274,6 +274,10 @@ def main() -> None:
         "dossier": dossier,
         "red_flags": red_flags,
         "notes": align.get("notes", []),
+        "inputs_sha256": fingerprint(run_dir, [align_path]
+                                     + ([Path(state["inputs"]["cost_book"])] if state.get("inputs", {}).get("cost_book") else [])
+                                     + [run_dir / o / "normalized" / "offer_normalized.json" for o in offers]
+                                     + [run_dir / o / "gate" / "gate_report.json" for o in offers]),
     }
     dump_json(comp / "matrix.json", matrix)
 
